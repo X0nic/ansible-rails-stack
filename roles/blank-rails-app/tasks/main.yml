@@ -22,8 +22,8 @@
     - "{{ rails_app_location }}/shared/log"
 
 - name: Check out the latest revision of the codebase and notify the proper handlers if there have been updates
-git: repo=https://github.com/X0nic/blank-rails-app
-       dest={{ rails_app_location }}/current
+  git: repo=https://github.com/X0nic/blank-rails-app.git
+        dest={{ rails_app_location }}/current
   sudo: yes
   sudo_user: deploy
   notify:
