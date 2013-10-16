@@ -17,6 +17,7 @@
   with_items:
     - autoconf
     - build-essential
+    - libmysqlclient-dev
 
 - name: Install python-software-properties so the apt_repository module will work properly
   apt: pkg=python-software-properties
