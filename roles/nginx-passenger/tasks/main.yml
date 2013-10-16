@@ -1,0 +1,65 @@
+---
+- name: Install the libcurl GnuTLS development files that Passenger requires
+  apt: pkg=libcurl4-gnutls-dev
+       state=present
+
+- name: Install Passenger
+  command: "{{ ruby_location }}/bin/gem install passenger -v {{ passenger_version }}
+            creates={{ ruby_location }}/lib/ruby/gems/{{ ruby_library_version }}/gems/passenger-{{ passenger_version }}/README.md"
+
+- name: Make Passenger symlinks
+  file: path=/usr/local/bin/{{ item }}
+        src={{ ruby_location }}/bin/{{ item }}
+        state=link
+  with_items:
+    - passenger-memory-stats
+    - passenger-status
+
+- name: Download the Nginx source code
+  get_url: url=http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz
+           dest=/usr/local/src/
+           sha256sum={{ nginx_checksum }}
+
+- name: Generate the Nginx installation script on the server
+  template: src=install-nginx.j2
+            dest=/usr/local/src/install-nginx.sh
+            owner=root
+            group=root
+            mode=700
+
+- name: Run the Nginx installation script
+  command: /usr/local/src/install-nginx.sh
+           creates={{ nginx_location }}/sbin/nginx
+
+- name: Generate the Nginx configuration file and restart the service if it has been updated
+  template: src=nginx-conf.j2
+            dest={{ nginx_location }}/conf/nginx.conf
+            owner=root
+            group=root
+  notify: Restart Nginx
+
+- name: Generate Nginx init script and restart the service if it has been updated
+  template: src=nginx-init.j2
+            dest=/etc/init.d/nginx
+            owner=root
+            group=root
+            mode=755
+  notify: Restart Nginx
+
+- name: Enable the Nginx init script so the service will start at boot
+  command: update-rc.d nginx defaults
+           creates=/etc/rc0.d/K20nginx
+
+- name: Set up Nginx vhost directories
+  file: path=/etc/nginx/{{ item }}
+        state=directory
+  with_items:
+    - sites-available
+    - sites-enabled
+
+- name: Set up log rotation for Nginx
+  template: src=nginx-logrotate.j2
+            dest=/etc/logrotate.d/nginx
+            owner=root
+            group=root
+            mode=644

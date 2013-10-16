@@ -1,0 +1,17 @@
+---
+- name: Restart Nginx with updated vhost configuration
+  action: service name=nginx state=restarted
+
+- name: Symlink the log directory to the shared location
+  file: path={{ rails_app_location }}/current/log
+        src={{ rails_app_location }}/shared/log
+        state=link
+
+- name: Install the bundle
+  command: bundle install --deployment --path {{ imgur_display_location }}/shared/bundle
+           chdir={{ rails_app_location }}/current
+  sudo: yes
+  sudo_user: deploy
+
+- name: Restart the rails application
+  command:  touch {{ rails_app_location }}/current/tmp/restart.txt
