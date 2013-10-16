@@ -1,11 +1,11 @@
 ---
-- name: Generate the imgur-display virtual host and restart Nginx if it is updated
+- name: Generate the rails virtual host and restart Nginx if it is updated
   template: src=vhost.j2
             dest=/etc/nginx/sites-available/rails
             mode=755
   notify: Restart Nginx with updated vhost configuration
 
-- name: Enable the imgur-display virtual host
+- name: Enable the rails virtual host
   file: path=/etc/nginx/sites-enabled/rails
         src=/etc/nginx/sites-available/rails
         state=link

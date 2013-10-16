@@ -8,7 +8,7 @@
         state=link
 
 - name: Install the bundle
-  command: bundle install --deployment --path {{ imgur_display_location }}/shared/bundle
+  command: bundle install --deployment --path {{ rails_app_location }}/shared/bundle
            chdir={{ rails_app_location }}/current
   sudo: yes
   sudo_user: deploy
